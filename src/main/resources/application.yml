@@ -1,0 +1,73 @@
+spring:
+  application:
+    name: auth
+  jpa:
+    database: postgresql
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  datasource:
+    url: ${POSTGRES_USER_URL}
+    username: ${POSTGRES_USERNAME}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: ${POSTGRES_JDBC_DRIVER}
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+  kafka:
+    bootstrap-servers: ${KAFKA}
+  cloud:
+    gateway:
+      routes:
+        - id: sign-in
+          uri: http://${AUTH_SERVICE}:${AUTH}
+          predicates:
+            - Path=/auth/signin/**
+            - Method=POST
+          filters:
+            - AnonymousFilter
+            - RewritePath=/auth/signin/(?<remaining>.*), /signin/${remaining}
+
+        - id: sign-out
+          uri: http://${AUTH_SERVICE}:${AUTH}
+          predicates:
+            - Path=/auth/signout
+            - Method=GET
+          filters:
+            - UserFilter
+            - RewritePath=/auth/signout, /signout
+
+        - id: sign-up
+          uri: http://${USER_SERVICE}:${USER}
+          predicates:
+            - Path=/users/signup
+            - Method=POST
+          filters:
+            - AnonymousFilter
+            - RewritePath=/users/signup, /signup
+
+        - id: public-user-service
+          uri: http://${USER_SERVICE}:${USER}
+          predicates:
+            - Path=/users
+            - Method=GET
+          filters:
+            - RewritePath=/users, /
+
+        - id: private-user-service
+          uri: http://${USER_SERVICE}:${USER}
+          predicates:
+            - Path=/users
+            - Method=POST, PUT, DELETE
+          filters:
+            - UserFilter
+            - RewritePath=/users, /
+
+
+
+
+server:
+  port: ${AUTH}
+  max-http-request-header-size: 16KB
