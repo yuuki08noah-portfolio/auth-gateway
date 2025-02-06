@@ -6,6 +6,7 @@ import com.auth.auth.exception.MissingSignInParametersException;
 import com.auth.auth.service.AuthService;
 import com.auth.auth.service.HeaderService;
 import com.auth.auth.service.TokenService;
+import com.auth.global.BaseResponse;
 import com.auth.user.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,18 +23,18 @@ public class SignInController {
   private final HeaderService headerService;
 
   @PostMapping("/id")
-  public ResponseEntity<String> signin(@RequestBody SignInByIdDTO signInByIdDTO, ServerWebExchange exchange) throws MissingSignInParametersException, UserNotFoundException {
+  public ResponseEntity<BaseResponse> signin(@RequestBody SignInByIdDTO signInByIdDTO, ServerWebExchange exchange) throws MissingSignInParametersException, UserNotFoundException {
     ServerHttpResponse response = exchange.getResponse();
     authService.signIn(signInByIdDTO);
     headerService.addHeader(tokenService.createToken(signInByIdDTO.id()), response);
-    return ResponseEntity.ok("User id "+ signInByIdDTO.id() + " successfully signed in.");
+    return ResponseEntity.ok(new BaseResponse(true, "User id "+ signInByIdDTO.id() + " successfully signed in.", null));
   }
 
   @PostMapping("/email")
-  public ResponseEntity<String> signin(@RequestBody SignInByEmailDTO signInByEmailDTO, ServerWebExchange exchange) throws MissingSignInParametersException, UserNotFoundException {
+  public ResponseEntity<BaseResponse> signin(@RequestBody SignInByEmailDTO signInByEmailDTO, ServerWebExchange exchange) throws MissingSignInParametersException, UserNotFoundException {
     ServerHttpResponse response = exchange.getResponse();
     authService.signIn(signInByEmailDTO);
     headerService.addHeader(tokenService.createToken(signInByEmailDTO.email()), response);
-    return ResponseEntity.ok("User id "+ signInByEmailDTO.email() + " successfully signed in.");
+    return ResponseEntity.ok(new BaseResponse(true, "User id "+ signInByEmailDTO.email() + " successfully signed in.", null));
   }
 }

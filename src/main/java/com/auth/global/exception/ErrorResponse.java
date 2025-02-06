@@ -2,12 +2,17 @@ package com.auth.global.exception;
 
 import java.time.LocalDateTime;
 
+record ErrorDetail (
+  Integer code,
+  String errorCode
+) {}
+
 public record ErrorResponse(
-        Integer code,
-        String errorCode,
+        Boolean result,
         String message,
+        ErrorDetail data,
         LocalDateTime timestamp) {
   public ErrorResponse(ErrorCode errorCode) {
-    this(errorCode.getCode(), errorCode.name(), errorCode.getMessage(), LocalDateTime.now());
+    this(false, errorCode.getMessage(), new ErrorDetail(errorCode.getCode(), errorCode.name()), LocalDateTime.now());
   }
 }

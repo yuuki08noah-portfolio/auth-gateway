@@ -35,9 +35,13 @@ public class TokenService {
   }
 
   public Boolean validateRefreshToken(String refreshToken) {
-    String userId = jwtRefreshTokenProvider.getUserId(refreshToken);
-    String redis = redisTemplate.opsForValue().get(userId.toString());
-    return jwtRefreshTokenProvider.validateToken(refreshToken) && redis != null && redis.equals(refreshToken);
+    try {
+      String userId = jwtRefreshTokenProvider.getUserId(refreshToken);
+      String redis = redisTemplate.opsForValue().get(userId.toString());
+      return jwtRefreshTokenProvider.validateToken(refreshToken) && redis != null && redis.equals(refreshToken);
+    } catch (Exception e) {
+      return false;
+    }
   }
 
   public Pair<String, String> refresh(String refreshToken) {

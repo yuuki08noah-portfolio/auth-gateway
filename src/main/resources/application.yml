@@ -16,8 +16,8 @@ spring:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
       password: ${REDIS_PASSWORD}
-  kafka:
-    bootstrap-servers: ${KAFKA}
+#  kafka:
+#    bootstrap-servers: ${KAFKA}
   cloud:
     gateway:
       routes:
@@ -38,6 +38,14 @@ spring:
           filters:
             - UserFilter
             - RewritePath=/auth/signout, /signout
+
+        - id: check
+          uri: http://${AUTH_SERVICE}:${AUTH}
+          predicates:
+            - Path=/auth/check
+            - Method=GET
+          filters:
+            - RewritePath=/auth/check, /check
 
         - id: sign-up
           uri: http://${USER_SERVICE}:${USER}

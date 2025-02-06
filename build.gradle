@@ -14,7 +14,7 @@ java {
     sourceSets {
         main {
             java {
-                srcDirs += 'build/generated/sources/annotationProcessor/java/main'
+                srcDirs = ['src/main/java']
             }
         }
     }
@@ -44,6 +44,7 @@ dependencies {
     // lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
 
     // env
     implementation 'me.paulschwarz:spring-dotenv:3.0.0'
@@ -56,7 +57,6 @@ dependencies {
     // mapstruct
     implementation 'org.mapstruct:mapstruct:1.5.3.Final'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.3.Final'
-    annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
 
     // querydsl
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
@@ -77,12 +77,6 @@ tasks.named('test') {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    options.annotationProcessorGeneratedSourcesDirectory = file("$buildDir/generated/sources/annotationProcessor/java/main")
-}
-
-tasks.withType(JavaExec) {
-    jvmArgs = [
-            "-Dhttp.netty.maxHeaderSize=16384",
-            "-Dhttp.netty.maxInitialLineLength=16384"
-    ]
+    options.generatedSourceOutputDirectory = file("build/generated/sources/annotationProcessor/java/main")
+    options.compilerArgs << "-Amapstruct.verbose=true"
 }

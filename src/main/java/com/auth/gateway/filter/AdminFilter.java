@@ -31,6 +31,9 @@ public class AdminFilter extends AbstractGatewayFilterFactory<Object> {
       ServerHttpResponse response = exchange.getResponse();
       String accessToken = response.getHeaders().getFirst("Authorization");
       String refreshToken = response.getHeaders().getFirst("RefreshToken");
+      if (accessToken == null && refreshToken == null) {
+        return Mono.error(new NotAdminException("Admin only can reach"));
+      }
       try {
         String userId = tokenService.getUserId(accessToken, refreshToken);
         Role role = userService.getUserById(userId).role();

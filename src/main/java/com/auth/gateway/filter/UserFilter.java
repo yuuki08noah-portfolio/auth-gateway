@@ -25,16 +25,14 @@ public class UserFilter extends AbstractGatewayFilterFactory<Object> {
       ServerHttpResponse response = exchange.getResponse();
       String accessToken = request.getHeaders().getFirst("Authorization");
       String refreshToken = request.getHeaders().getFirst("RefreshToken");
-      if (accessToken == null || refreshToken == null) {
+      if (accessToken == null && refreshToken == null) {
         return Mono.error(new NotUserException("User only can reach"));
       }
-      if (tokenService.validateAccessToken(accessToken)) {
+      if (!accessToken.equals(null) && tokenService.validateAccessToken(accessToken)) {
         return chain.filter(exchange);
-      } else {
-        if (tokenService.validateRefreshToken(refreshToken)) {
-          headerService.addHeader(tokenService.refresh(refreshToken), response);
-          return chain.filter(exchange);
-        };
+      } else if(!refreshToken.equals(null) && tokenService.validateRefreshToken(refreshToken)) {
+        headerService.addHeader(tokenService.refresh(refreshToken), response);
+        return chain.filter(exchange);
       }
       return Mono.error(new NotUserException("User only can reach"));
     };

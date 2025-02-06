@@ -1,9 +1,6 @@
 package com.auth.auth.service.jwt;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 
 import java.security.Key;
 import java.util.Date;
@@ -23,12 +20,16 @@ public class JwtProvider {
   };
 
   public String getUserId(String token, Key key) {
-    return Jwts.parserBuilder()
-            .setSigningKey(key)
-            .build()
-            .parseClaimsJws(token)
-            .getBody()
-            .getSubject();
+    try {
+      return Jwts.parserBuilder()
+              .setSigningKey(key)
+              .build()
+              .parseClaimsJws(token)
+              .getBody()
+              .getSubject();
+    } catch(Exception e) {
+      return null;
+    }
   };
 
   public Boolean validateToken(String token, Key key) {

@@ -1,8 +1,8 @@
 package com.auth.user.mapper;
 
-import com.auth.user.repository.entity.User;
 import com.auth.user.dto.UserDTO;
 import com.auth.user.dto.UserPublicDTO;
+import com.auth.user.repository.entity.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
