@@ -1,5 +1,6 @@
 package com.auth.global.exception;
 
+import com.auth.auth.exception.InvalidJwtException;
 import com.auth.auth.exception.MissingSignInParametersException;
 import com.auth.user.exception.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -21,5 +22,10 @@ public class GlobalException {
   @ExceptionHandler(MissingSignInParametersException.class)
   public ResponseEntity<ErrorResponse> handleMissingSignInParametersException(MissingSignInParametersException e) {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(MISSING_SIGN_IN_PARAMETERS));
+  }
+
+  @ExceptionHandler(InvalidJwtException.class)
+  public ResponseEntity<ErrorResponse> handleInvalidJwtException(InvalidJwtException e) {
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(INVALID_JWT_TOKEN));
   }
 }

@@ -21,6 +21,7 @@ spring:
   cloud:
     gateway:
       routes:
+        # Auth
         - id: sign-in
           uri: http://${AUTH_SERVICE}:${AUTH}
           predicates:
@@ -47,6 +48,15 @@ spring:
           filters:
             - RewritePath=/auth/check, /check
 
+        - id: refresh
+          uri: http://${AUTH_SERVICE}:${AUTH}
+          predicates:
+            - Path=/auth/refresh
+            - Method=GET
+          filters:
+            - RewritePath=/auth/refresh, /refresh
+
+        # User
         - id: sign-up
           uri: http://${USER_SERVICE}:${USER}
           predicates:

@@ -2,11 +2,13 @@ package com.auth.gateway.filter;
 
 import com.auth.auth.service.HeaderService;
 import com.auth.auth.service.TokenService;
+import com.auth.gateway.exception.AccessTokenInvalidException;
 import com.auth.gateway.exception.NotUserException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.data.util.Pair;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
@@ -22,19 +24,17 @@ public class UserFilter extends AbstractGatewayFilterFactory<Object> {
   public GatewayFilter apply(Object config) {
     return (exchange, chain) -> {
       ServerHttpRequest request = exchange.getRequest();
-      ServerHttpResponse response = exchange.getResponse();
       String accessToken = request.getHeaders().getFirst("Authorization");
-      String refreshToken = request.getHeaders().getFirst("RefreshToken");
-      if (accessToken == null && refreshToken == null) {
-        return Mono.error(new NotUserException("User only can reach"));
+      if (accessToken == null) {
+        return Mono.error(new AccessTokenInvalidException("AccessToken is null."));
       }
-      if (!accessToken.equals(null) && tokenService.validateAccessToken(accessToken)) {
-        return chain.filter(exchange);
-      } else if(!refreshToken.equals(null) && tokenService.validateRefreshToken(refreshToken)) {
-        headerService.addHeader(tokenService.refresh(refreshToken), response);
+      if (tokenService.validateAccessToken(accessToken)) {
         return chain.filter(exchange);
       }
-      return Mono.error(new NotUserException("User only can reach"));
+      return Mono.defer(() -> {
+        exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+        return Mono.error(new AccessTokenInvalidException("AccessToken is invalid."));
+      });
     };
   }
 }

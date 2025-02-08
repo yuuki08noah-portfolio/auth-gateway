@@ -10,6 +10,9 @@ public enum ErrorCode {
   // Bad Request: 400
   MISSING_SIGN_IN_PARAMETERS(400, "Missing sign in parameters"),
 
+  // Unauthorized: 401
+  INVALID_JWT_TOKEN(401, "Invalid access token"),
+
   // Not Found: 404
   USER_NOT_FOUND(404, "User not found"),
 

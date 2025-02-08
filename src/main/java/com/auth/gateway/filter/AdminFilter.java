@@ -1,6 +1,7 @@
 package com.auth.gateway.filter;
 
 import com.auth.auth.exception.AccessTokenAndRefreshTokenNotMatchesException;
+import com.auth.gateway.exception.AccessTokenInvalidException;
 import com.auth.gateway.exception.NotAdminException;
 import com.auth.auth.service.AuthService;
 import com.auth.auth.service.TokenService;
@@ -10,6 +11,7 @@ import com.auth.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
@@ -27,25 +29,21 @@ public class AdminFilter extends AbstractGatewayFilterFactory<Object> {
   @Override
   public GatewayFilter apply(Object config) {
     return (exchange, chain) -> {
-
       ServerHttpResponse response = exchange.getResponse();
       String accessToken = response.getHeaders().getFirst("Authorization");
-      String refreshToken = response.getHeaders().getFirst("RefreshToken");
-      if (accessToken == null && refreshToken == null) {
+      if (accessToken == null) {
         return Mono.error(new NotAdminException("Admin only can reach"));
       }
       try {
-        String userId = tokenService.getUserId(accessToken, refreshToken);
+        String userId = tokenService.getUserId(accessToken);
         Role role = userService.getUserById(userId).role();
         if (role != Role.ADMIN) {
           return Mono.error(new NotAdminException("Admin only can reach"));
         }
-      } catch (AccessTokenAndRefreshTokenNotMatchesException e) {
-        return Mono.error(new AccessTokenAndRefreshTokenNotMatchesException("Access Token or Refresh Token Not Matches"));
+        return chain.filter(exchange);
       } catch (UserNotFoundException e) {
-        return Mono.error(new UserNotFoundException("User Not Found"));
+        throw new RuntimeException(e);
       }
-      return chain.filter(exchange);
     };
   }
 }

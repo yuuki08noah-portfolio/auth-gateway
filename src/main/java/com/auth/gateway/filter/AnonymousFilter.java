@@ -25,11 +25,6 @@ public class AnonymousFilter extends AbstractGatewayFilterFactory<Object> {
       String accessToken = request.getHeaders().getFirst("Authorization");
       String refreshToken = request.getHeaders().getFirst("RefreshToken");
 
-      System.out.println("accessToken: " + accessToken);
-      System.out.println("refreshToken: " + refreshToken);
-      log.debug("AccessToken: {}", accessToken);
-      log.debug("RefreshToken: {}", refreshToken);
-
       if (accessToken == null && refreshToken == null) {
         return chain.filter(exchange);
       }

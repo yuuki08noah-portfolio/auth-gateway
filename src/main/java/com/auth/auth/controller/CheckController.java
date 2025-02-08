@@ -5,6 +5,7 @@ import com.auth.auth.service.TokenService;
 import com.auth.gateway.exception.NotUserException;
 import com.auth.global.BaseResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -24,18 +25,13 @@ public class CheckController {
   @GetMapping("/check")
   public ResponseEntity<BaseResponse> check(ServerWebExchange exchange) {
     ServerHttpRequest request = exchange.getRequest();
-    ServerHttpResponse response = exchange.getResponse();
     String accessToken = request.getHeaders().getFirst("Authorization");
-    String refreshToken = request.getHeaders().getFirst("RefreshToken");
-    if (accessToken == null && refreshToken == null) {
-      return ResponseEntity.ok(new BaseResponse(true, "Not signed", Map.of("signed", false)));
+    if (accessToken == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new BaseResponse(true, "Not signed", Map.of("signed", false)));
     }
-    if (!accessToken.equals(null) && tokenService.validateAccessToken(accessToken)) {
-      return ResponseEntity.ok(new BaseResponse(true, "Signed", Map.of("signed", true)));
-    } else if(!refreshToken.equals(null) && tokenService.validateRefreshToken(refreshToken)) {
-      headerService.addHeader(tokenService.refresh(refreshToken), response);
+    if (tokenService.validateAccessToken(accessToken)) {
       return ResponseEntity.ok(new BaseResponse(true, "Signed", Map.of("signed", true)));
     }
-    return ResponseEntity.ok(new BaseResponse(true, "Not signed", Map.of("signed", false)));
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new BaseResponse(true, "Not signed", Map.of("signed", false)));
   }
 }

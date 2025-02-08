@@ -51,11 +51,9 @@ public class TokenService {
     return token;
   }
 
-  public String getUserId(String accessToken, String refreshToken) throws AccessTokenAndRefreshTokenNotMatchesException {
-    if (jwtAccessTokenProvider.getUserId(accessToken) != jwtRefreshTokenProvider.getUserId(refreshToken)) {
-      throw new AccessTokenAndRefreshTokenNotMatchesException("Access token does not match refresh token");
-    }
-    return jwtAccessTokenProvider.getUserId(accessToken);
+  public String getUserId(String accessToken) {
+    String token = accessToken.split(" ")[1];
+    return jwtAccessTokenProvider.getUserId(token);
   }
 
 
